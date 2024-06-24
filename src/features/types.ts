@@ -14,6 +14,6 @@ export interface PROPS_PROFILE {
     img: File | null;
 }
 
-export interface PROPS_NIKCNAME {
-    nickName: string;
+export interface PROPS_NICKNAME {
+    nicName: string;
 }

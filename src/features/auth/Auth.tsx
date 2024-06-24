@@ -23,6 +23,9 @@ import {
   fetchAsyncCreateProf,
 } from "./authSlice";
 
+import { TextField, Button, CircularProgress } from "@material-ui/core";
+
+
 const customStyles = {
   overlay: {
     backgroundColor: "#777777",
@@ -46,8 +49,214 @@ const Auth: React.FC = () => {
     const openSignUp = useSelector(selectOpenSignUp);
     const isLoadingAuth = useSelector(selectIsLoadingAuth);
     const dispatch: AppDispatch = useDispatch();
+
   return (
-    <div>Auth</div>
+    <>
+    <Modal
+        isOpen={openSignUp}
+        onRequestClose={async () => {
+            await dispatch(resetOpenSignUp())
+        }}
+        style={customStyles}
+    >
+        <Formik
+            initialErrors={{ email: "required" }}
+            initialValues={{ email: "", password: "" }}
+            onSubmit={async (valuse) => {
+                await dispatch(fetchCredStart())
+                const resultRog = await dispatch(fetchAsyncRegister(valuse))
+
+                if (fetchAsyncRegister.fulfilled.match(resultRog)) {
+                    await dispatch(fetchAsyncLogin(valuse))
+                    await dispatch(fetchAsyncCreateProf({ nicName: "anonymous" }))
+                    // await dispatch(fetchAsyncGetPosts());
+                    // await dispatch(fetchAsyncGetComments());
+                    await dispatch(fetchAsyncGetProfs())
+                    await dispatch(fetchAsyncGetMyProf())
+                }
+            await dispatch(fetchCredEnd())
+            await dispatch(resetOpenSignUp())
+            }}
+            validationSchema={Yup.object().shape({   //入力内容をヴァリデーションできる
+                email: Yup.string()
+                  .email("email format is wrong")
+                  .required("email is must"),
+                password: Yup.string().required("password is must").min(4),
+            })}
+        >
+            {({
+            handleSubmit,
+            handleChange,   //入力するごとにヴァリデーション
+            handleBlur,     //カーソルが離れるごとにヴァリデーション
+            values,         //ユーザーが入力している値
+            errors,         //エラーがあった場合のエラーメッセージ(validationSchemaのエラーメッセージ   )
+            touched,        //フォーカスが当たった時にtrue
+            isValid,        //ヴァリデーションが問題なかった時true
+          }) => (
+            <div>
+              <form onSubmit={handleSubmit}>
+                <div className={styles.auth_signUp}>
+                  <h1 className={styles.auth_title}>Instagram</h1>
+                  <br />
+                  <div className={styles.auth_progress}>
+                    {isLoadingAuth && <CircularProgress />}
+                  </div>
+                  <br />
+
+                  <TextField
+                    placeholder="email"
+                    type="input"
+                    name="email"
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    value={values.email}
+                  />
+                  <br />
+                  {touched.email && errors.email ? (
+                    <div className={styles.auth_error}>{errors.email}</div>
+                  ) : null}
+
+                  <TextField
+                    placeholder="password"
+                    type="password"
+                    name="password"
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    value={values.password}
+                  />
+                  {touched.password && errors.password ? (
+                    <div className={styles.auth_error}>{errors.password}</div>
+                  ) : null}
+                  <br />
+                  <br />
+
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    disabled={!isValid}
+                    type="submit"
+                  >
+                    Register
+                  </Button>
+                  <br />
+                  <br />
+                  <span
+                    className={styles.auth_text}
+                    onClick={async () => {
+                      await dispatch(setOpenSignIn());
+                      await dispatch(resetOpenSignUp());
+                    }}
+                  >
+                    You already have a account ?
+                  </span>
+                </div>
+              </form>
+            </div>
+          )}
+        </Formik>
+    </Modal>
+
+    <Modal
+        isOpen={openSignIn}
+        onRequestClose={async () => {
+            await dispatch(resetOpenSignIn())
+        }}
+        style={customStyles}
+    >
+        <Formik
+          initialErrors={{ email: "required" }}
+          initialValues={{ email: "", password: "" }}
+          onSubmit={async (values) => {
+            await dispatch(fetchCredStart());
+            const result = await dispatch(fetchAsyncLogin(values));
+            if (fetchAsyncLogin.fulfilled.match(result)) {
+              await dispatch(fetchAsyncGetProfs());
+            //   await dispatch(fetchAsyncGetPosts());
+            //   await dispatch(fetchAsyncGetComments());
+              await dispatch(fetchAsyncGetMyProf());
+            }
+            await dispatch(fetchCredEnd());
+            await dispatch(resetOpenSignIn());
+          }}
+          validationSchema={Yup.object().shape({
+            email: Yup.string()
+              .email("email format is wrong")
+              .required("email is must"),
+            password: Yup.string().required("password is must").min(4),
+          })}
+        >
+          {({
+            handleSubmit,
+            handleChange,
+            handleBlur,
+            values,
+            errors,
+            touched,
+            isValid,
+          }) => (
+            <div>
+              <form onSubmit={handleSubmit}>
+                <div className={styles.auth_signUp}>
+                  <h1 className={styles.auth_title}>Instagram</h1>
+                  <br />
+                  <div className={styles.auth_progress}>
+                    {isLoadingAuth && <CircularProgress />}
+                  </div>
+                  <br />
+
+                  <TextField
+                    placeholder="email"
+                    type="input"
+                    name="email"
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    value={values.email}
+                  />
+
+                  {touched.email && errors.email ? (
+                    <div className={styles.auth_error}>{errors.email}</div>
+                  ) : null}
+                  <br />
+
+                  <TextField
+                    placeholder="password"
+                    type="password"
+                    name="password"
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    value={values.password}
+                  />
+                  {touched.password && errors.password ? (
+                    <div className={styles.auth_error}>{errors.password}</div>
+                  ) : null}
+                  <br />
+                  <br />
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    disabled={!isValid}
+                    type="submit"
+                  >
+                    Login
+                  </Button>
+                  <br />
+                  <br />
+                  <span
+                    className={styles.auth_text}
+                    onClick={async () => {
+                      await dispatch(resetOpenSignIn());
+                      await dispatch(setOpenSignUp());
+                    }}
+                  >
+                    You don't have a account ?
+                  </span>
+                </div>
+              </form>
+            </div>
+          )}
+        </Formik>
+    </Modal>
+    </>
   )
 }
 
