@@ -1,19 +1,18 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { RootState } from '../../app/store';
-import axios from 'axios';
-import { PROPS_AUTHEN, PROPS_NIKCNAME, PROPS_PROFILE } from '../types';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { RootState } from "../../app/store";
+import axios from "axios";
+import { PROPS_AUTHEN, PROPS_PROFILE, PROPS_NICKNAME } from "../types";
 
-
-const apiUrl = process.env.REACT_APP_DEV_API_URL
+const apiUrl = process.env.REACT_APP_DEV_API_URL;
 
 //ログイン用
 export const fetchAsyncLogin = createAsyncThunk(
-  'auth/post',
+  "auth/post",
   async (authen: PROPS_AUTHEN) => {
     const res = await axios.post(`${apiUrl}authen/jwt/create`, authen, {
-        headers: {
-            "Contents": "application/json",
-        },
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
     return res.data;
   }
@@ -21,25 +20,25 @@ export const fetchAsyncLogin = createAsyncThunk(
 
 //新規登録用
 export const fetchAsyncRegister = createAsyncThunk(
-  'auth/register',
-  async (authen: PROPS_AUTHEN) => {
-    const res = await axios.post(`${apiUrl}api/register`, authen, {
-        headers: {
-            "Contents": "application/json",
-        },
+  "auth/register",
+  async (auth: PROPS_AUTHEN) => {
+    const res = await axios.post(`${apiUrl}api/register/`, auth, {
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
     return res.data;
   }
 );
 
-export const fetchAsyncCreateProf = createAsyncThunk(   //最初のプロフィール作成を行う
-  'profile/post',
-  async (authen: PROPS_NIKCNAME) => {
-    const res = await axios.post(`${apiUrl}api/profile`, authen, {
-        headers: {
-            "Contents": "application/json",
-            Authorization: `JWT ${localStorage.localJWT}`,   //トークンを取得していないとアクセスできない
-        },
+export const fetchAsyncCreateProf = createAsyncThunk(
+  "profile/post",
+  async (nickName: PROPS_NICKNAME) => {
+    const res = await axios.post(`${apiUrl}api/profile/`, nickName, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `JWT ${localStorage.localJWT}`,
+      },
     });
     return res.data;
   }
@@ -65,9 +64,7 @@ export const fetchAsyncUpdateProf = createAsyncThunk(
   }
 );
 
-export const fetchAsyncGetMyProf = createAsyncThunk(
-    "profile/get",
-    async () => {
+export const fetchAsyncGetMyProf = createAsyncThunk("profile/get", async () => {
   const res = await axios.get(`${apiUrl}api/myprofile/`, {
     headers: {
       Authorization: `JWT ${localStorage.localJWT}`,
@@ -76,9 +73,7 @@ export const fetchAsyncGetMyProf = createAsyncThunk(
   return res.data[0];
 });
 
-export const fetchAsyncGetProfs = createAsyncThunk(
-    "profiles/get",
-    async () => {
+export const fetchAsyncGetProfs = createAsyncThunk("profiles/get", async () => {
   const res = await axios.get(`${apiUrl}api/profile/`, {
     headers: {
       Authorization: `JWT ${localStorage.localJWT}`,
@@ -87,70 +82,66 @@ export const fetchAsyncGetProfs = createAsyncThunk(
   return res.data;
 });
 
-
-
 export const authSlice = createSlice({
-  name: 'auth',
+  name: "auth",
   initialState: {
-    openSignIn: true,   //ログインモーダル
-    openSignUp: false,  //新規登録モーダル
-    openProfile: false,  //profile編集モーダル
-    isLoadingAuth: false,   //バックエンドのAPIにアクセス中
+    openSignIn: true,
+    openSignUp: false,
+    openProfile: false,
+    isLoadingAuth: false,
     myprofile: {
+      id: 0,
+      nickName: "",
+      userProfile: 0,
+      created_on: "",
+      img: "",
+    },
+    profiles: [
+      {
         id: 0,
         nickName: "",
         userProfile: 0,
         created_on: "",
         img: "",
-    },
-    profiles: [
-        {
-            id: 0,
-            nickName: "",
-            userProfile: 0,
-            created_on: "",
-            img: "",
-        },
-    ]
+      },
+    ],
   },
   reducers: {    //componentから呼ばれたらすぐ処理が実行される
     fetchCredStart(state) {
-        state.isLoadingAuth = true;
+      state.isLoadingAuth = true;
     },
     fetchCredEnd(state) {
-        state.isLoadingAuth = false;
+      state.isLoadingAuth = false;
     },
     setOpenSignIn(state) {
-        state.openSignIn = true;
+      state.openSignIn = true;
     },
     resetOpenSignIn(state) {
-        state.openSignIn = false;
+      state.openSignIn = false;
     },
     setOpenSignUp(state) {
-        state.openSignUp = true;
+      state.openSignUp = true;
     },
     resetOpenSignUp(state) {
-        state.openSignUp = false;
+      state.openSignUp = false;
     },
     setOpenProfile(state) {
-        state.openProfile = true;
+      state.openProfile = true;
     },
     resetOpenProfile(state) {
-        state.openProfile = false;
+      state.openProfile = false;
     },
-    editNickName(state, action) {
-        state.myprofile.nickName = action.payload;
+    editNickname(state, action) {
+      state.myprofile.nickName = action.payload;
     },
   },
-  extraReducers: (builder) => {      //componentから呼ばれたら,その処理(createAsyncThunkで定義した関数)の状態によって実行される
-    builder
-      .addCase(fetchAsyncLogin.fulfilled, (state, action) => {
-        localStorage.setItem('localJWT', action.payload.access);
-      });
-    builder
-      .addCase(fetchAsyncCreateProf.fulfilled, (state, action) => {
-        state.myprofile = action.payload;
-      });
+  extraReducers: (builder) => {    //componentから呼ばれたら,その処理(createAsyncThunkで定義した関数)の状態によって実行される
+    builder.addCase(fetchAsyncLogin.fulfilled, (state, action) => {
+      localStorage.setItem("localJWT", action.payload.access);
+    });
+    builder.addCase(fetchAsyncCreateProf.fulfilled, (state, action) => {
+      state.myprofile = action.payload;
+    });
     builder.addCase(fetchAsyncGetMyProf.fulfilled, (state, action) => {
       state.myprofile = action.payload;
     });
@@ -163,11 +154,20 @@ export const authSlice = createSlice({
         prof.id === action.payload.id ? action.payload : prof
       );
     });
-      
   },
 });
 
-export const { fetchCredStart, fetchCredEnd, setOpenSignIn, resetOpenSignIn, setOpenSignUp, resetOpenSignUp, setOpenProfile, resetOpenProfile, editNickName } = authSlice.actions;
+export const {
+  fetchCredStart,
+  fetchCredEnd,
+  setOpenSignIn,
+  resetOpenSignIn,
+  setOpenSignUp,
+  resetOpenSignUp,
+  setOpenProfile,
+  resetOpenProfile,
+  editNickname,
+} = authSlice.actions;
 
 export const selectIsLoadingAuth = (state: RootState) =>
   state.auth.isLoadingAuth;
