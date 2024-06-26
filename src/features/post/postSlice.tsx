@@ -7,7 +7,7 @@ const apiUrlPost = `${process.env.REACT_APP_DEV_API_URL}api/post/`;
 const apiUrlComment = `${process.env.REACT_APP_DEV_API_URL}api/comment/`;
 
 
-export const fetchAsynkGetPosts = createAsyncThunk(
+export const fetchAsyncGetPosts = createAsyncThunk(
   "post/get",
   async () => {
     const res = await axios.get(apiUrlPost, {
@@ -19,13 +19,13 @@ export const fetchAsynkGetPosts = createAsyncThunk(
   }
 );
 
-export const fetchAsynkNewPosts = createAsyncThunk(
+export const fetchAsyncNewPosts = createAsyncThunk(
   "post/post",
   async (newPost: PROPS_NEWPOST) => {
     const uploadData = new FormData()
     uploadData.append("title", newPost.title)
     newPost.img && uploadData.append("img", newPost.img, newPost.img.name)
-    const res = await axios.get(apiUrlPost, {
+    const res = await axios.post(apiUrlPost, uploadData, {
         headers: {
             Authorization: `JWT ${localStorage.localJWT}`,
         },
@@ -136,13 +136,13 @@ export const postSlice = createSlice({
     },
   },
   extraReducers: (builder) => {    //componentから呼ばれたら,その処理(createAsyncThunkで定義した関数)の状態によって実行される
-    builder.addCase(fetchAsynkGetPosts.fulfilled, (state, action) => {
+    builder.addCase(fetchAsyncGetPosts.fulfilled, (state, action) => {
         return {
             ...state,                //現在の状態をスプレッド構文...stateを使ってコピーし、postsプロパティをaction.payloadに置き換え
             posts: action.payload,
         }
     });
-    builder.addCase(fetchAsynkNewPosts.fulfilled, (state, action) => {
+    builder.addCase(fetchAsyncNewPosts.fulfilled, (state, action) => {
         return {
             ...state,
             posts: [...state.posts, action.payload]
