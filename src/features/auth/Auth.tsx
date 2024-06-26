@@ -24,6 +24,7 @@ import {
 } from "./authSlice";
 
 import { TextField, Button, CircularProgress } from "@material-ui/core";
+import { fetchAsyncGetPosts, fetchAsyncGetComments } from '../post/postSlice'
 
 
 const customStyles = {
@@ -69,8 +70,8 @@ const Auth: React.FC = () => {
                 if (fetchAsyncRegister.fulfilled.match(resultRog)) {
                     await dispatch(fetchAsyncLogin(valuse))
                     await dispatch(fetchAsyncCreateProf({ nickName: "anonymous" }))
-                    // await dispatch(fetchAsyncGetPosts());
-                    // await dispatch(fetchAsyncGetComments());
+                    await dispatch(fetchAsyncGetPosts());
+                    await dispatch(fetchAsyncGetComments());
                     await dispatch(fetchAsyncGetProfs())
                     await dispatch(fetchAsyncGetMyProf())
                 }
@@ -97,6 +98,7 @@ const Auth: React.FC = () => {
               <form onSubmit={handleSubmit}>
                 <div className={styles.auth_signUp}>
                   <h1 className={styles.auth_title}>Instagram</h1>
+                  <h2>make new user</h2>
                   <br />
                   <div className={styles.auth_progress}>
                     {isLoadingAuth && <CircularProgress />}
@@ -171,8 +173,8 @@ const Auth: React.FC = () => {
             const result = await dispatch(fetchAsyncLogin(values));
             if (fetchAsyncLogin.fulfilled.match(result)) {
               await dispatch(fetchAsyncGetProfs());
-            //   await dispatch(fetchAsyncGetPosts());
-            //   await dispatch(fetchAsyncGetComments());
+              await dispatch(fetchAsyncGetPosts());
+              await dispatch(fetchAsyncGetComments());
               await dispatch(fetchAsyncGetMyProf());
             }
             await dispatch(fetchCredEnd());
@@ -198,6 +200,7 @@ const Auth: React.FC = () => {
               <form onSubmit={handleSubmit}>
                 <div className={styles.auth_signUp}>
                   <h1 className={styles.auth_title}>Instagram</h1>
+                  <h2>Login</h2>
                   <br />
                   <div className={styles.auth_progress}>
                     {isLoadingAuth && <CircularProgress />}
